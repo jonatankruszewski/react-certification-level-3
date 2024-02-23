@@ -1,16 +1,14 @@
 .root {
-  width: 400px;
-  display: block;
+  display: flex;
+  flex-direction: column;
   box-sizing: border-box;
 
   input {
-    max-width: 400px;
     padding: 12px;
-    min-width: 100%;
     border-radius: 4px;
     box-sizing: border-box;
     margin: 0;
-
+    min-width: 240px;
   }
 
   .content {
@@ -18,12 +16,13 @@
     border-radius: 4px;
     box-sizing: border-box;
     border: 1px solid black;
-    margin-top: 4px;
+    position: absolute;
+    margin-top: 48px;
+    width: 420px;
 
     .overflowWrapper {
       overflow-y: auto;
       overflow-x: hidden;
-      min-height: 200px;
       max-height: 300px;
       box-sizing: border-box;
       text-decoration: none;
@@ -32,7 +31,6 @@
       margin: 0;
       border-radius: 12px;
       background-color: #fcfcfc;
-
 
       li {
         list-style: none;

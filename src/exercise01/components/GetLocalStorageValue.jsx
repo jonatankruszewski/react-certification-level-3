@@ -1,5 +1,5 @@
 import useLocalStorage from "../hooks/useLocalStorage.jsx";
-import styles from "./Exercise01.module.scss";
+import styles from "./localStorage.module.scss";
 
 const GetLocalStorageValue = () => {
     const {

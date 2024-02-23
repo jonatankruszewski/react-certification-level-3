@@ -1,7 +1,7 @@
 import React from "react";
 import useLocalStorage from "../hooks/useLocalStorage.jsx";
-import styles from "./Exercise01.module.scss";
 import classNames from "classnames";
+import styles from "./localStorage.module.scss";
 
 const SetLocalStorageValue = () => {
     const key = 'myName';
@@ -19,7 +19,7 @@ const SetLocalStorageValue = () => {
     console.log({shouldDisableButton, userValue, value, userKey})
 
     return (
-        <>
+        <div className={styles.root}>
             <h3>Set a Value to local storage</h3>
             <form
                 className={styles.form}
@@ -51,14 +51,14 @@ const SetLocalStorageValue = () => {
                 </label>
                 <button
                     type='submit'
-                    className={classNames(styles.button, {[styles.disabled]:shouldDisableButton})}
-                    disabled={!userValue || !userKey ||shouldDisableButton}
+                    className={classNames(styles.button, {[styles.disabled]: shouldDisableButton})}
+                    disabled={!userValue || !userKey || shouldDisableButton}
                 >
                     Set item
                 </button>
                 <div>{JSON.stringify(value)}</div>
             </form>
-        </>
+        </div>
     );
 };
 
