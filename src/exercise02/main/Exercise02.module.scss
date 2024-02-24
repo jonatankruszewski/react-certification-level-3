@@ -1,5 +1,31 @@
-.root {
-  //display: flex;
-  //flex-direction: column;
-  //width: 420px;
+.title {
+  margin: 0;
+}
+
+.box {
+  display: flex;
+  gap: 16px;
+}
+
+.button {
+  border-radius: 8px;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: white;
+  border: 2px solid #146CFF;
+  color: #146CFF;
+  cursor: pointer;
+  transition: border-color 0.25s;
+
+  &:hover {
+    border-color: #1050bb;
+    color: #1050bb;
+  }
+
+  &:focus,
+  &:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+  }
 }

@@ -99,7 +99,6 @@ const useLocalStorage = ({key, initialValue = "", options = {subscribed: false, 
                 if (mounted) {
                     const retrievedItem = retrieveItem();
                     const currentStorageValue = _.get(retrievedItem, 'value');
-                    debugger;
                     if (_.isEqual(currentStorageValue, _.get(value, 'value'))) {
                         return;
                     }

@@ -1,7 +1,7 @@
 import {useLayoutEffect, useRef, useState} from "react";
 import styles from "./Autocomplete.module.scss"
 import PropTypes from "prop-types";
-import useOnClickOutside from "../hooks/useClickOutside.jsx";
+import useOnClickOutside from "../../common/hooks/useClickOutside.jsx";
 import _ from "lodash";
 import ControlledInput from "./ControlledInput.jsx";
 
