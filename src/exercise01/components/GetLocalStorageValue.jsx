@@ -8,7 +8,7 @@ const GetLocalStorageValue = () => {
         subscribe,
         unSubscribe,
         subscribed,
-    } = useLocalStorage({key: 'myName', initialValue: "", options: {subscribed: false, override: false}});
+    } = useLocalStorage({key: 'myName', options: {subscribed: true, override: false}});
 
 
     return (

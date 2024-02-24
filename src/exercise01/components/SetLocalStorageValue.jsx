@@ -1,21 +1,19 @@
 import React from "react";
 import useLocalStorage from "../hooks/useLocalStorage.jsx";
 import styles from "./localStorage.module.scss";
+import _ from "lodash";
+import classNames from "classnames";
 
 const SetLocalStorageValue = () => {
     const key = 'myName';
-    const name = 'Shk Shk Slim Shady';
+    // const name = 'Shk Shk Slim Shady';
     const {
         value,
         updateValue,
-        updateKeyName,
         clearItem,
-    } = useLocalStorage({key, initialValue: name, options: {subscribe: false, override: true}});
+    } = useLocalStorage({key, options: {subscribe: false, override: false}});
 
-    const [userKey, setUserKey] = React.useState(key);
     const [userValue, setUserValue] = React.useState(value?.value || '');
-
-    const shouldDisableButton = !userValue || !userKey || userValue === value?.value;
 
     return (
         <div className={styles.root}>
@@ -24,26 +22,21 @@ const SetLocalStorageValue = () => {
                 className={styles.form}
                 onSubmit={e => {
                     e.preventDefault();
-                    updateKeyName(userKey);
                     updateValue(userValue);
                 }}
             >
-                <p>This component initialized with a key value pair of <strong>{key} : {name}</strong>. Once
+                <p>This component initialized with a key value pair
+                    of <strong>{key} : {_.isEmpty(value.value) ? '""' : value.value}</strong>. Once
                     initialized, the useLocalStorageHook will store it and handle the value, error, key, and success.
                 </p>
                 <p>This instance <strong>is not subscribed to changes</strong>, so any component or human changing the
-                    value of it will not be reflected on the JSON output.</p>
+                    value of <strong>outside this component</strong> will not be reflected on the JSON output. Local
+                    changes will.</p>
 
-                <label htmlFor='key'>
-                    Set local storage key name:
-                    <input
-                        id={'key'}
-                        type='text'
-                        onChange={(e) => setUserKey(e.target.value)}
-                        value={userKey}
-                        className={styles.input}
-                    />
-                </label>
+                <p>The API also exposes options for initializing the instance subscribed or not, or if you wish to
+                    override any existing value upon initialization.</p>
+                <p>Deleting the key will delete both the key and the value.</p>
+
                 <label htmlFor='key'>
                     Set local storage value:
                     <input
@@ -56,13 +49,14 @@ const SetLocalStorageValue = () => {
                 </label>
                 <button
                     type='submit'
-                    className={styles.button}
+                    className={classNames(styles.button, {[styles.disabled]: !userValue})}
+                    disabled={!userValue}
                 >
                     Update item
                 </button>
                 <button
                     type='button'
-                    onClick={clearItem}
+                    onClick={() => clearItem(() => setUserValue(""))}
                     className={styles.button}
                 >
                     Delete item
