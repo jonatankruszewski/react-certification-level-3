@@ -1,7 +1,6 @@
 .root {
   display: flex;
   flex-direction: column;
-  width: 420px;
 
   .form {
     border: 2px solid darkgray;
@@ -11,6 +10,10 @@
     flex-direction: column;
     gap: 16px;
     background-color: #fcfcfc;
+
+    p {
+      margin: 0;
+    }
 
     label {
       display: flex;

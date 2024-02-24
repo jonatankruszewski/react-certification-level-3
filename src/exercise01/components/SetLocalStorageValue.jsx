@@ -1,6 +1,5 @@
 import React from "react";
 import useLocalStorage from "../hooks/useLocalStorage.jsx";
-import classNames from "classnames";
 import styles from "./localStorage.module.scss";
 
 const SetLocalStorageValue = () => {
@@ -9,14 +8,14 @@ const SetLocalStorageValue = () => {
     const {
         value,
         updateValue,
-        updateKeyName
+        updateKeyName,
+        clearItem,
     } = useLocalStorage({key, initialValue: name, options: {subscribe: false, override: true}});
 
     const [userKey, setUserKey] = React.useState(key);
     const [userValue, setUserValue] = React.useState(value?.value || '');
 
     const shouldDisableButton = !userValue || !userKey || userValue === value?.value;
-    console.log({shouldDisableButton, userValue, value, userKey})
 
     return (
         <div className={styles.root}>
@@ -29,6 +28,12 @@ const SetLocalStorageValue = () => {
                     updateValue(userValue);
                 }}
             >
+                <p>This component initialized with a key value pair of <strong>{key} : {name}</strong>. Once
+                    initialized, the useLocalStorageHook will store it and handle the value, error, key, and success.
+                </p>
+                <p>This instance <strong>is not subscribed to changes</strong>, so any component or human changing the
+                    value of it will not be reflected on the JSON output.</p>
+
                 <label htmlFor='key'>
                     Set local storage key name:
                     <input
@@ -51,10 +56,16 @@ const SetLocalStorageValue = () => {
                 </label>
                 <button
                     type='submit'
-                    className={classNames(styles.button, {[styles.disabled]: shouldDisableButton})}
-                    disabled={!userValue || !userKey || shouldDisableButton}
+                    className={styles.button}
                 >
-                    Set item
+                    Update item
+                </button>
+                <button
+                    type='button'
+                    onClick={clearItem}
+                    className={styles.button}
+                >
+                    Delete item
                 </button>
                 <div>{JSON.stringify(value)}</div>
             </form>

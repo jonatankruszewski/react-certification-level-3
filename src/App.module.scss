@@ -1,9 +1,15 @@
 .root {
   display: flex;
   flex-direction: column;
+  flex: 1;
   gap: 16px;
   align-items: center;
-  min-height: 100vh;
   word-wrap: break-word;
-  flex: 1;
+  min-width: 280px;
+  max-width: 600px;
+  box-sizing: border-box;
+
+  > section{
+    width: 100%;
+  }
 }

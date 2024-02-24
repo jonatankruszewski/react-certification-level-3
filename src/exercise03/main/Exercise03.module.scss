@@ -1,6 +1,13 @@
 .root {
-  min-height: 500px;
+  min-height: 600px;
   display: flex;
   flex-direction: column;
-  width: 420px;
+
+  p{
+    margin: 8px 0;
+  }
+
+  .explanation{
+    margin: 0 0 8px 0;
+  }
 }

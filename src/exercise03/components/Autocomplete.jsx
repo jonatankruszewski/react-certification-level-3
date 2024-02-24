@@ -1,50 +1,71 @@
-import {useEffect, useRef, useState} from "react";
+import {useLayoutEffect, useRef, useState} from "react";
 import styles from "./Autocomplete.module.scss"
-import {useDebounce} from "../hooks/useDebounce.jsx";
 import PropTypes from "prop-types";
 import useOnClickOutside from "../hooks/useClickOutside.jsx";
+import _ from "lodash";
+import ControlledInput from "./ControlledInput.jsx";
 
 const AutoComplete = ({list, label, filterProp, valueChange}) => {
     const [searchPhrase, setSearchPhrase] = useState("");
     const [isOpen, setIsOpen] = useState(false);
-    const debouncedSearchTerm = useDebounce(searchPhrase, 300);
     const menuRef = useRef();
     const inputRef = useRef();
+    const updateWidth = () => {
+        if (!_.isElement(inputRef.current) || !_.isElement(menuRef.current)) {
+            return;
+        }
+
+        if (inputRef.current.clientWidth === menuRef.current.clientWidth) {
+            return;
+        }
+
+        menuRef.current.style.width = inputRef.current.clientWidth + 2 + 'px';
+    }
+
+    useLayoutEffect(() => {
+        if (isOpen) {
+            updateWidth()
+        }
+    }, [isOpen, searchPhrase])
 
     useOnClickOutside(menuRef, () => {
         setIsOpen(false)
     });
 
-
-    useEffect(() => {
-        if (searchPhrase) {
-            setIsOpen(true)
-        }
-    }, [searchPhrase]);
-
     const onFocus = () => {
         setIsOpen(true);
-        inputRef.current.value = "";
-        inputRef.current.value = searchPhrase;
     }
 
     const onChange = (e) => {
         setSearchPhrase(e.target.value)
+        setIsOpen(true)
+    }
+
+    const onBlur = () => {
+        setIsOpen(false)
     }
 
     const onSelectItem = entity => {
-        setIsOpen(false);
-        setSearchPhrase("");
         valueChange(entity)
+        setIsOpen(false)
+        setSearchPhrase("");
     }
-    const getHighlightedText = (text) => {
-        // Split on highlight term and include term into parts, ignore case
+
+    const onMouseDown = () => {
+        setIsOpen(true)
+    }
+    const highlightText = (text) => {
         const parts = text.split(new RegExp(`(${searchPhrase})`, 'gi'));
-        return <span> {parts.map((part, i) =>
-            <span key={i} style={part.toLowerCase() === searchPhrase.toLowerCase() ? {fontWeight: 'bold'} : {}}>
-            {part}
-        </span>)
-        } </span>;
+        return (
+            <span> {
+                parts.map((part, i) =>
+                    <span key={i} style={part.toLowerCase() === searchPhrase.toLowerCase() ? {fontWeight: 'bold'} : {}}>
+                        {part}
+                    </span>
+                )
+            }
+            </span>
+        );
     }
 
     const renderList = list
@@ -54,18 +75,24 @@ const AutoComplete = ({list, label, filterProp, valueChange}) => {
         .map((entity, idx) => (
                 <li
                     key={`${entity[name]}_${idx}`}
-                    onClick={() => onSelectItem(entity)}
+                    onMouseDown={() => onSelectItem(entity)}
                 >
-                    {getHighlightedText(entity[label])}
+                    {highlightText(entity[label])}
                 </li>
             )
         )
 
-
     return (
         <div className={styles.root}>
-            <input onChange={onChange} onFocus={onFocus} value={searchPhrase} ref={inputRef}/>
-            {list.length > 0 && debouncedSearchTerm && isOpen &&
+            <ControlledInput
+                onChange={onChange}
+                onFocus={onFocus}
+                onBlur={onBlur}
+                onMouseDown={onMouseDown}
+                defaultValue={searchPhrase}
+                ref={inputRef}
+            />
+            {list.length > 0 && searchPhrase && isOpen &&
                 <div className={styles.content} ref={menuRef}>
                     <ul className={styles.overflowWrapper}>
                         {renderList.length > 0 ? renderList : <li className={styles.noResults}>No results</li>}
