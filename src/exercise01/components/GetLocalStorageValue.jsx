@@ -3,11 +3,12 @@ import styles from "./localStorage.module.scss";
 
 const GetLocalStorageValue = () => {
     const {
-        value,
+        item,
         subscribe,
         unSubscribe,
-        subscribed,
     } = useLocalStorage({key: 'myName', options: {subscribed: true, override: false}});
+
+    const {subscribed, value} = item;
 
     return (
         <div className={styles.root}>
@@ -39,7 +40,7 @@ const GetLocalStorageValue = () => {
                 >
                     {subscribed ? 'Unsubscribe to changes' : 'Subscribe to changes'}
                 </button>
-                <div>{JSON.stringify(value)}</div>
+                <div>{JSON.stringify(item)}</div>
             </form>
         </div>
     );

@@ -6,13 +6,14 @@ import classNames from "classnames";
 
 const SetLocalStorageValue = () => {
     const key = 'myName';
-    // const name = 'Shk Shk Slim Shady';
     const {
-        value,
+        item,
         updateValue,
         clearItem,
+        initValue,
     } = useLocalStorage({key, options: {subscribe: false, override: false}});
 
+    const {value} = item;
     const [userValue, setUserValue] = React.useState(value?.value || '');
 
     return (
@@ -26,16 +27,16 @@ const SetLocalStorageValue = () => {
                 }}
             >
                 <p>This component initialized with a key value pair
-                    of <strong>{key} : {_.isEmpty(value.value) ? '""' : value.value}</strong>. Once
-                    initialized, the useLocalStorageHook will store it and handle the value, error, key, and success.
+                    of <strong>{key} : {_.isEmpty(initValue) ? '""' : initValue}</strong>. Once
+                    initialized, the useLocalStorageHook will store it and handle the value, error, key, success (of last operation), exists and subscription.
                 </p>
                 <p>This instance <strong>is not subscribed to changes</strong>, so any component or human changing the
-                    value of <strong>outside this component</strong> will not be reflected on the JSON output. Local
+                    value of <strong>outside this component</strong> will not be reflected on the JSON output below. Only local
                     changes will.</p>
 
                 <p>The API also exposes options for initializing the instance subscribed or not, or if you wish to
                     override any existing value upon initialization.</p>
-                <p>Deleting the key will delete both the key and the value.</p>
+                <p>Deleting the key will delete both the key and the value. Subscribed components can realize of the deletion by checking the nullity of the value, an <strong>exists: false</strong> property and the error specifying so.</p>
 
                 <label htmlFor='key'>
                     Set local storage value:
@@ -61,7 +62,7 @@ const SetLocalStorageValue = () => {
                 >
                     Delete item
                 </button>
-                <div>{JSON.stringify(value)}</div>
+                <div>{JSON.stringify(item)}</div>
             </form>
         </div>
     );

@@ -1,194 +1,205 @@
-import React, {useEffect} from "react";
-import {handleStringify, isValidKey} from "../utils/localStorageUtils.js";
+import {useEffect, useRef, useState} from "react";
+import {isValidKey} from "../utils/localStorageUtils.js";
 import _ from "lodash";
 import {v4 as uuid, validate as isUuidString} from "uuid";
 
-const useLocalStorage = ({key, initialValue = "", options = {subscribed: false, override: false}} = {}) => {
+const useLocalStorage = ({key = uuid(), initialValue = "", options = {subscribed: false, override: false}} = {}) => {
 
-        const memoizedKey = React.useRef(isValidKey(key) ? key : uuid());
+    const override = useState(_.get(options, 'override', false));
+    const memoizedKey = useRef(isValidKey(key) ? key : uuid());
+    const initValue = useRef(override ? initialValue : localStorage.getItem(memoizedKey.current) || "");
 
-        const storeItem = futureValue => {
-            try {
-                const sanitizedValue = handleStringify(futureValue);
-                localStorage.setItem(memoizedKey.current, sanitizedValue);
+    const [error, setError] = useState(null);
+    const [value, setValue] = useState(null);
+    const [subscribed, setSubscribed] = useState(_.get(options, 'subscribed', false));
+    const [exists, setExists] = useState(false);
+    const [success, setSuccess] = useState(false);
 
-                const newValue = {
-                    success: true, error: null, key: memoizedKey.current, value: sanitizedValue, exists: true,
-                }
-
-                setValue(newValue)
-
-            } catch (e) {
-                setValue({
-                    success: false, error: e, key: memoizedKey.current, value: null, exists: true,
-                })
-            }
-        }
-        const handleRawValue = (value) => {
-            try {
-                const parsedItem = JSON.parse(value);
-                return {
-                    success: true, error: null, key: memoizedKey.current, value: parsedItem, exists: true,
-                }
-            } catch (e) {
-
-                if (e instanceof SyntaxError) {
-                    return {
-                        success: true, error: null, key: memoizedKey.current, value, exists: true,
-                    }
-                }
-
-                return {
-                    success: false, error: e, key: memoizedKey.current, value: "", exists: true,
-                }
-            }
+    // Everything gets stringified!
+    const handleStringify = (value) => {
+        if (_.isString(value)) {
+            return value;
         }
 
-        const retrieveItem = () => {
-            if (!(memoizedKey.current in localStorage)) {
-                return {
-                    success: false,
-                    error: new SyntaxError('Key not found'),
-                    key: memoizedKey.current,
-                    value: null,
-                    exists: false,
-                }
-            }
-            const value = localStorage.getItem(memoizedKey.current);
-            return handleRawValue(value);
+        if (_.isSymbol(value)) {
+            return value.toString();
         }
 
-        const getItem = () => {
-            const override = _.get(options, 'override', false);
-            const value = override ? initialValue : localStorage.getItem(memoizedKey.current) || "";
-            return handleRawValue(value);
+        if (_.isNil(value)) {
+            return "";
         }
 
+        try {
+            return JSON.stringify(value);
+        } catch (e) {
+            setError(e.message || "Error stringifying value")
+            return "";
+        }
+    }
 
-        const [value, setValue] = React.useState(getItem());
-        const [subscribed, setSubscribed] = React.useState(_.get(options, 'subscribed', false));
+    const storeItem = futureValue => {
+        try {
+            const sanitizedValue = handleStringify(futureValue);
+            localStorage.setItem(memoizedKey.current, sanitizedValue);
+            setError(null);
+            setSuccess(true);
+            setValue(sanitizedValue);
+            setExists(true);
+        } catch (e) {
+            setError(e.message || "Error storing value");
+            setSuccess(false);
+            setValue("");
+            setExists(true);
+        }
+    }
+    const handleRetrieveRawValue = (value) => {
+        try {
+            const parsedItem = JSON.parse(value);
+            setValue(parsedItem);
+            setError(null)
+            setSuccess(true)
+            setExists(true)
 
-
-        useEffect(() => {
-            const isInStorage = memoizedKey.current in localStorage;
-            const shouldOverride = _.get(options, 'override', false);
-            if (!isInStorage || shouldOverride) {
-                storeItem(initialValue);
+        } catch (e) {
+            if (e instanceof SyntaxError) {
+                setValue(value || "");
+                setError(null)
+                setSuccess(true)
+                setExists(true)
                 return;
             }
 
-            const currentValue = getItem();
-            setValue(currentValue);
+            setValue(null);
+            setError(e.message || "Error retrieving value");
+            setSuccess(false)
+            setExists(true)
+        }
+    }
 
-            return () => {
-                for (const key in localStorage) {
-                    if (localStorage.getItem(key) === "" && isUuidString(key)) {
-                        localStorage.removeItem(key)
-                    }
+    const retrieveExistingValue = () => {
+        if (!(memoizedKey.current in localStorage)) {
+            setSuccess(false);
+            setError('Key does not exist');
+            setValue(null);
+            setExists(false);
+            return;
+        }
+
+        const value = localStorage.getItem(memoizedKey.current);
+        return handleRetrieveRawValue(value);
+    }
+
+    const getItem = () => {
+        handleRetrieveRawValue(initValue.current);
+    }
+
+
+    useEffect(() => {
+        const isInStorage = memoizedKey.current in localStorage;
+
+        if (!isInStorage || override) {
+            storeItem(initValue.current);
+            return;
+        }
+
+        getItem();
+
+        return () => {
+            for (const key in localStorage) {
+                if (localStorage.getItem(key) === "" && isUuidString(key)) {
+                    localStorage.removeItem(key)
                 }
             }
-            //eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [])
+        }
+        //eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
-        useEffect(() => {
+    useEffect(() => {
+        if (!subscribed) {
+            return;
+        }
+        let mounted = true;
+        const timer = setInterval(() => {
+            if (mounted) {
+                retrieveExistingValue();
+            }
+        }, 5000);
+
+        return () => {
+            clearInterval(timer);
+            mounted = false;
+        }
+        //eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [subscribed]);
+
+    const clearItem = (cb) => {
+        localStorage.removeItem(memoizedKey.current);
+        setSuccess(true);
+        setError(null);
+        setValue("");
+        setExists(false);
+
+        if (_.isFunction(cb)) {
+            cb();
+        }
+
+    }
+
+    const pointToDifferentKey = (newKey, forceRemove = false) => {
+        if (!isValidKey(newKey) || newKey === memoizedKey.current) {
+            return;
+        }
+
+        if (forceRemove) {
+            clearItem();
+        }
+
+        memoizedKey.current = newKey;
+
+        if (!(newKey in localStorage)) {
+            storeItem("");
+            return;
+        }
+
+        getItem()
+
+    }
+
+    const updateValue = (newValue) => storeItem(newValue);
+
+    const subscribe = () => setSubscribed(true)
+
+    const unSubscribe = () => setSubscribed(false)
+
+    useEffect(() => {
+        const handleStorageChange = (e) => {
+            const {key, newValue} = e;
+
             if (!subscribed) {
                 return;
             }
-            let mounted = true;
-            const timer = setInterval(() => {
-                if (mounted) {
-                    const retrievedItem = retrieveItem();
-                    const currentStorageValue = _.get(retrievedItem, 'value');
-                    if (_.isEqual(currentStorageValue, _.get(value, 'value'))) {
-                        return;
-                    }
 
-                    storeItem(retrievedItem);
-                }
-            }, 10000);
-
-            return () => {
-                clearInterval(timer);
-                mounted = false;
+            if (key === memoizedKey.current) {
+                setValue(newValue);
+                setSuccess(true);
+                setError(null);
+                setExists(true)
             }
-            //eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [subscribed]);
-
-        const clearItem = (cb) => {
-            if (memoizedKey.current in localStorage) {
-                localStorage.removeItem(memoizedKey.current);
-
-                setValue({
-                    success: true, error: null, key: memoizedKey.current, value: null, exists: false,
-                });
-
-                if (_.isFunction(cb)) {
-                    cb();
-                }
-
-                return;
-            }
-
-            setValue({
-                success: false,
-                error: new SyntaxError('Key not found'),
-                key: memoizedKey.current,
-                value: null,
-                exists: true,
-            })
-
-
         }
 
-        const pointToDifferentKey = (newKey) => {
-            if (!isValidKey(newKey) || newKey === memoizedKey.current) {
-                return;
-            }
+        window.addEventListener('storage', handleStorageChange)
+        return () => window.removeEventListener('storage', handleStorageChange)
+    })
 
-            clearItem();
-            memoizedKey.current = newKey;
-
-            if (!(newKey in localStorage)) {
-                storeItem("");
-                return;
-            }
-
-            setValue(getItem());
-        }
-
-        const updateValue = (newValue) => storeItem(newValue);
-
-        const subscribe = () => setSubscribed(true)
-
-        const unSubscribe = () => setSubscribed(false)
-
-        useEffect(() => {
-            const handleStorageChange = (e) => {
-                const {key, newValue} = e;
-
-                if (!subscribed) {
-                    return;
-                }
-
-                if (key === memoizedKey.current) {
-                    setValue({...getItem(), value: newValue});
-                }
-            }
-
-            window.addEventListener('storage', handleStorageChange)
-            return () => window.removeEventListener('storage', handleStorageChange)
-        })
-
-        return {
-            value,
-            updateValue,
-            clearItem,
-            subscribe,
-            unSubscribe,
-            pointToDifferentKey,
-            subscribed
-        }
+    return {
+        item: {error, value, key: memoizedKey.current, exists, success, subscribed},
+        updateValue,
+        clearItem,
+        subscribe,
+        unSubscribe,
+        pointToDifferentKey,
+        initValue: initValue.current,
     }
-;
+};
 
 export default useLocalStorage;
