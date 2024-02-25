@@ -8,7 +8,7 @@ const GetLocalStorageValue = () => {
         unSubscribe,
     } = useLocalStorage({key: 'myName', options: {subscribed: true, override: false}});
 
-    const {subscribed, value} = item;
+    const {subscribed} = item;
 
     return (
         <div className={styles.root}>
