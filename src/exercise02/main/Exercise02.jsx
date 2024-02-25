@@ -84,7 +84,7 @@ const Exercise02 = () => {
                     The state of the overlay is managed by a context, which is used to open and close the overlay.
                     <br/>
                     <br/>
-                    Body Scroll is locked in the "Modal" mode, but not in the "Dialog" mode.
+                    Body Scroll is locked in the Modal mode, but not in the Dialog mode.
             </p>
             <div className={styles.box}>
 

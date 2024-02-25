@@ -34,12 +34,13 @@ export const useFocusTrap = () => {
     useEffect(() => {
         ref.current.addEventListener('keydown', handleFocus);
 
+        const refCurrent = ref.current;
         return () => {
-            if (_.isEmpty(ref.current)) {
+            if (_.isEmpty(refCurrent)) {
                 return
             }
 
-            ref.current.removeEventListener('keydown', handleFocus);
+            refCurrent.removeEventListener('keydown', handleFocus);
         };
     }, []);
 
