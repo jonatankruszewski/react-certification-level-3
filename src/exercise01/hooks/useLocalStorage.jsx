@@ -4,8 +4,7 @@ import _ from "lodash";
 import {v4 as uuid, validate as isUuidString} from "uuid";
 
 const useLocalStorage = ({key = uuid(), initialValue = "", options = {subscribed: false, override: false}} = {}) => {
-
-    const override = useState(_.get(options, 'override', false));
+    const override = _.get(options, 'override', false);
     const memoizedKey = useRef(isValidKey(key) ? key : uuid());
     const initValue = useRef(override ? initialValue : localStorage.getItem(memoizedKey.current) || "");
 

@@ -89,7 +89,7 @@ const AutoComplete = ({list, label, filterProp, valueChange}) => {
                 onFocus={onFocus}
                 onBlur={onBlur}
                 onMouseDown={onMouseDown}
-                defaultValue={searchPhrase}
+                value={searchPhrase}
                 ref={inputRef}
             />
             {list.length > 0 && searchPhrase && isOpen &&
