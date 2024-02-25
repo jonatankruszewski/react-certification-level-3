@@ -16,7 +16,8 @@ const Exercise03 = () => {
             <h2>
                 Exercise 03
             </h2>
-            <p>This page randomly provides to the AutoComplete component a list of users or countries. When clicked, you
+            <p>This page randomly provides to the <strong>AutoComplete</strong> component a list of users or countries.
+                When clicked, you
                 will be able to see the element selected as JSON</p>
             <p>Features:</p>
             <ul className={styles.explanation}>

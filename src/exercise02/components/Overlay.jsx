@@ -23,7 +23,7 @@ const Overlay = ({backDrop, blockInteractivity, header, body, footer}) => {
     }, [isOpen, mode]);
 
     useEffect(() => {
-        return () => document.body.style.overflowY = 'scroll';
+        return () => document.body.style.overflowY = 'auto';
     }, []);
 
     return (

@@ -1,8 +1,7 @@
-import React, {useEffect, useState} from "react";
+import {useEffect, useState, forwardRef} from "react";
 import _ from "lodash";
 
-// eslint-disable-next-line react/display-name
-const ControlledInput = React.forwardRef((props, ref) => {
+const ControlledInput = forwardRef((props, ref) => {
     // eslint-disable-next-line react/prop-types
     const {value, onChange, ...rest} = props;
     const [cursor, setCursor] = useState(null);
@@ -23,4 +22,7 @@ const ControlledInput = React.forwardRef((props, ref) => {
 
     return <input ref={ref} value={value} onChange={handleChange} {...rest} />;
 });
+
+ControlledInput.displayName = "ControlledInput";
+
 export default ControlledInput;
